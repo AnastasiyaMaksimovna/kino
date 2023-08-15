@@ -1,7 +1,11 @@
 const {Given, When, Then, Before, After} = require('cucumber');
 const puppeteer = require('puppeteer');
-// const expect = require('chai');
+const chai = require("chai");
+var expect = chai.expect;
 const { clickElement, getText } = require("../../lib/commands.js");
+const {setDefaultTimeout} = require('cucumber');
+
+setDefaultTimeout(60000);
 
 Given("user went to the website, chose tomorrow's date, movie and time", async function () {
     await this.page.goto("http://qamid.tmweb.ru/client/index.php");
@@ -32,11 +36,16 @@ When("user clicks the get booking code button", async function (){
 });
 Then("user sees the QR code", async function () {
     const actual = await getText(this.page, ".ticket__hint");
-    expect(actual).toContain('Покажите QR-код нашему контроллеру для подтверждения бронирования.');
+    expect(actual).contains('Покажите QR-код нашему контроллеру для подтверждения бронирования.');
 });
 
-Then("user sees that the ticket cannot be booked", async function () {
-    expect(await this.page.$eval("button", (button) => { return button.disabled;})).toBe(true); 
+Then("user see button disabled {string}", async function (string) {
+    const actual = String(await this.page.$eval("button", (button) => {
+        return button.disabled;
+      })
+    );
+    const expected = await string;
+    expect(actual).contains(expected);
 });
 
 Before(async function () {
